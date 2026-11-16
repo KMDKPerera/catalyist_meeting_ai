@@ -1,0 +1,9 @@
+.env
+memory.db
+runs/*
+!runs/adjudication.json
+!runs/eval_report.md
+!runs/brief_v3.txt
+__pycache__/
+*.zip
+*.pdf

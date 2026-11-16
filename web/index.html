@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meeting Memory</title>
+<style>
+  /* Day theme only, black and white: one ink and a few greys. The one place colour
+     is kept is the decision timeline, where each kind of item has its own hue. */
+  :root {
+    color-scheme: light;
+    --bg: #fafafa; --panel: #ffffff; --ink: #16161a; --mid: #5c5c63; --muted: #8a8a90;
+    --line: #e4e4e6; --line-soft: #efeff0; --wash: #f2f2f3; --mark: #e2e2e4;
+    --decision: #1f7a4d; --proposal: #2b62b3; --objection: #b3261e; --action: #9a6400;
+    --fact: #5b5b6b; --requirement: #7a3d8c; --replaced: #9a6400;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 400 15px/1.62 ui-sans-serif, -apple-system, "Segoe UI Variable Text", "Segoe UI",
+          Inter, Roboto, Helvetica, Arial, sans-serif;
+    letter-spacing: 0.004em; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  }
+  header { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; padding: 22px 26px 0; }
+  h1 { font-size: 17px; font-weight: 500; margin: 0; letter-spacing: 0.01em; }
+  #stats { color: var(--muted); font-size: 12.5px; letter-spacing: 0.01em; }
+  nav { display: flex; gap: 2px; padding: 16px 26px 0; border-bottom: 1px solid var(--line); overflow-x: auto; }
+  nav button { background: none; border: 0; border-bottom: 1px solid transparent; margin-bottom: -1px; color: var(--muted); padding: 8px 12px; font: inherit; font-size: 14px; cursor: pointer; white-space: nowrap; }
+  nav button:hover { color: var(--mid); }
+  nav button.on { color: var(--ink); border-color: var(--ink); }
+  main { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 20px; padding: 22px 26px 60px; align-items: start; }
+  @media (max-width: 980px) { main { grid-template-columns: minmax(0, 1fr); } }
+  section { display: none; } section.on { display: block; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 15px 17px; margin-bottom: 12px; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  input[type=text], textarea, select { font: inherit; font-size: 14px; color: inherit; background: var(--panel); border: 1px solid var(--line); border-radius: 5px; padding: 9px 11px; }
+  input[type=text]:focus, textarea:focus, select:focus { outline: 1px solid var(--mid); outline-offset: -1px; border-color: var(--mid); }
+  textarea { width: 100%; min-height: 70px; resize: vertical; line-height: 1.6; }
+  input[type=text] { flex: 1; min-width: 180px; }
+  button.go { background: var(--ink); color: var(--panel); border: 1px solid var(--ink); border-radius: 5px; padding: 9px 17px; font: inherit; font-size: 14px; cursor: pointer; letter-spacing: 0.01em; }
+  button.go:hover { background: var(--mid); border-color: var(--mid); }
+  button.go:disabled { opacity: .35; cursor: wait; }
+  button.pill { background: var(--panel); border: 1px solid var(--line); color: var(--mid); border-radius: 999px; padding: 4px 13px; font: inherit; font-size: 12.5px; cursor: pointer; }
+  button.pill:hover { border-color: var(--mid); color: var(--ink); }
+  button.pill.on { background: var(--ink); border-color: var(--ink); color: var(--panel); }
+  .muted { color: var(--muted); } .small { font-size: 13px; }
+  h2 { font-size: 14px; font-weight: 500; margin: 0 0 7px; letter-spacing: 0.012em; }
+  h3 { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .11em; color: var(--muted); margin: 22px 0 9px; }
+  .step { border-left: 1px solid var(--line); padding: 4px 0 4px 13px; margin: 9px 0; }
+  .step .tool { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; color: var(--ink); }
+  .step.rejected { border-left-width: 3px; border-color: var(--ink); }
+  .step pre { margin: 6px 0 0; white-space: pre-wrap; word-break: break-word; font: 12px/1.5 ui-monospace, Consolas, monospace; color: var(--muted); max-height: 180px; overflow: auto; }
+  details > summary { cursor: pointer; color: var(--muted); font-size: 12.5px; }
+  details > summary:hover { color: var(--mid); }
+  .answer { font-size: 16px; line-height: 1.6; }
+  .cite { display: block; width: 100%; text-align: left; background: none; border: 0; border-left: 1px solid var(--mid); padding: 5px 0 5px 12px; margin: 9px 0; font: inherit; font-size: 14px; color: var(--mid); cursor: pointer; }
+  .cite:hover { background: var(--wash); color: var(--ink); }
+  .cite .mid { font-size: 12px; letter-spacing: .05em; color: var(--muted); margin-right: 7px; font-variant-numeric: tabular-nums; }
+  .badge { font-size: 10.5px; font-weight: 400; padding: 1px 6px; border-radius: 3px; border: 1px solid var(--line); color: var(--muted); margin-left: 7px; white-space: nowrap; letter-spacing: .04em; }
+  .badge.bad { background: var(--ink); border-color: var(--ink); color: var(--panel); }
+  .badge.warn { border-color: var(--replaced); color: var(--replaced); font-style: normal; }
+  /* No red or green to lean on: a problem reads as the darkest, heaviest text on the page. */
+  .ok { color: var(--mid); } .warn { color: var(--mid); font-style: italic; }
+  .bad, pre.passage.bad { color: var(--ink); font-weight: 500; }
+  .thread-grid { display: grid; grid-template-columns: repeat(var(--cols, 4), minmax(0, 1fr)); gap: 10px; }
+  @media (max-width: 700px) { .thread-grid { grid-template-columns: minmax(0, 1fr); } }
+  /* No text-transform here: a meeting id's trailing letter is part of its name (TS3012a, not TS3012A). */
+  .col-head { font-size: 11.5px; font-weight: 400; letter-spacing: .06em; color: var(--muted); border-bottom: 1px solid var(--line); padding-bottom: 5px; margin-bottom: 7px; }
+  .item { display: block; width: 100%; text-align: left; font: inherit; font-size: 13px; line-height: 1.52; color: var(--ink); background: var(--panel); border: 1px solid var(--line-soft); border-left: 2px solid var(--line); border-radius: 4px; padding: 8px 10px; margin-bottom: 6px; cursor: pointer; }
+  .item:hover { border-color: var(--mid); }
+  .item.superseded { color: var(--muted); } .item.superseded .stmt { text-decoration: line-through; text-decoration-color: var(--muted); }
+  /* The kind is shown by the left rule as well as the label, so the cards stay
+     scannable in one colour: solid ink decides, dashed objects, dotted is owed. */
+  .kind { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+  .item.decision { border-left-color: var(--decision); } .item.decision .kind { color: var(--decision); }
+  .item.proposal { border-left-color: var(--proposal); } .item.proposal .kind { color: var(--proposal); }
+  .item.objection { border-left-style: dashed; border-left-color: var(--objection); } .item.objection .kind { color: var(--objection); }
+  .item.action { border-left-style: dotted; border-left-color: var(--action); } .item.action .kind { color: var(--action); }
+  .item.fact { border-left-color: var(--fact); } .item.fact .kind { color: var(--fact); }
+  .item.requirement { border-left-color: var(--requirement); } .item.requirement .kind { color: var(--requirement); }
+  .sup { color: var(--replaced); font-size: 11.5px; margin-top: 4px; }
+  aside { position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow: auto; }
+  .turn { padding: 6px 8px; border-radius: 4px; font-size: 13px; line-height: 1.55; color: var(--mid); }
+  .turn.focus { background: var(--wash); color: var(--ink); }
+  .turn .who { font-weight: 500; margin-right: 6px; color: var(--ink); }
+  .turn .when { color: var(--muted); font-size: 11px; margin-right: 6px; font-variant-numeric: tabular-nums; }
+  mark { background: var(--mark); color: var(--ink); border-radius: 2px; padding: 0 1px; }
+  .badge.current { border-color: var(--decision); color: var(--decision); margin-left: 0; margin-right: 6px; }
+  .item.current { border-color: var(--decision); border-left-width: 3px; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 11.5px; color: var(--muted); margin-top: 10px; }
+  .legend i { display: inline-block; width: 14px; border-top: 2px solid; margin-right: 5px; vertical-align: middle; }
+  .facts { display: flex; gap: 22px; flex-wrap: wrap; margin-top: 12px; }
+  .facts div { font-size: 12px; color: var(--muted); } .facts b { display: block; font-size: 18px; font-weight: 500; color: var(--ink); letter-spacing: -0.01em; }
+  .now { font-size: 13px; color: var(--ink); border-left: 2px solid var(--decision); padding: 2px 0 2px 10px; margin: 2px 0 12px; }
+  .now span { display: block; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--decision); font-weight: 600; }
+  .point { padding: 10px 0; border-top: 1px solid var(--line-soft); } .point:first-of-type { border-top: 0; padding-top: 2px; }
+  .point .cite { margin: 6px 0 0; font-size: 13px; }
+  .hist { display: block; width: 100%; text-align: left; background: none; border: 0; border-top: 1px solid var(--line-soft); padding: 8px 0; font: inherit; font-size: 13px; color: var(--mid); cursor: pointer; }
+  .hist:first-of-type { border-top: 0; } .hist:hover { color: var(--ink); }
+  .linkish { background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: var(--mid); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line); }
+  .linkish:hover { color: var(--ink); text-decoration-color: var(--mid); }
+  .spinner { display: inline-block; width: 11px; height: 11px; border: 1.5px solid var(--line); border-top-color: var(--ink); border-radius: 50%; animation: spin .8s linear infinite; vertical-align: -1px; margin-right: 7px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+  .empty { text-align: center; color: var(--muted); padding: 34px 16px; font-size: 13.5px; }
+  pre.brief { white-space: pre-wrap; word-break: break-word; font: inherit; line-height: 1.62; margin: 0; }
+  pre.passage { white-space: pre-wrap; word-break: break-word; font: 12px/1.55 ui-monospace, Consolas, monospace; color: var(--mid); margin: 6px 0 0; max-height: 220px; overflow: auto; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Meeting Memory</h1>
+  <span id="stats"></span>
+</header>
+<nav id="tabs">
+  <button data-tab="ask" class="on">Ask</button>
+  <button data-tab="timeline">Decision timeline</button>
+  <button data-tab="search">Search</button>
+  <button data-tab="submission">Answers &amp; brief</button>
+  <button data-tab="add">Add meeting</button>
+</nav>
+<main>
+  <div>
+    <section id="ask" class="on">
+      <div class="card">
+        <textarea id="q" placeholder="Ask about a team's meetings, e.g. What did Team TS3005 propose losing to get under budget?"></textarea>
+        <div class="row" style="margin-top:8px">
+          <button class="go" id="askBtn">Ask the agent</button>
+          <span class="muted small" id="askStatus">Name the team in the question (e.g. TS3012). A question takes about 5 to 14 model calls.</span>
+        </div>
+        <div class="row" id="examples" style="margin-top:12px"><span class="muted small">Try:</span></div>
+      </div>
+      <div id="askOut"><div class="empty">Ask a question to see the agent search the memory, read the transcript and cite its answer.</div></div>
+      <div id="askHistory"></div>
+    </section>
+
+    <section id="timeline">
+      <div class="card">
+        <div class="row">
+          <select id="team"></select>
+          <span class="muted small">Show the record as of:</span>
+          <span id="asof" class="row"></span>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <input type="text" id="tlFilter" placeholder="Filter subjects, e.g. battery, screen, price">
+          <label class="small muted"><input type="checkbox" id="tlChanged"> Only subjects where something was replaced</label>
+        </div>
+        <div class="legend">
+          <span><i style="border-color:var(--decision)"></i>decision</span>
+          <span><i style="border-color:var(--proposal)"></i>proposal</span>
+          <span><i style="border-color:var(--objection);border-top-style:dashed"></i>objection</span>
+          <span><i style="border-color:var(--action);border-top-style:dotted"></i>action</span>
+          <span><i style="border-color:var(--fact)"></i>fact</span>
+          <span><i style="border-color:var(--requirement)"></i>requirement</span>
+          <span>struck through = replaced later</span>
+        </div>
+      </div>
+      <div id="tlTeam"></div>
+      <div id="tlOut"></div>
+    </section>
+
+    <section id="search">
+      <div class="card">
+        <div class="row">
+          <input type="text" id="sq" placeholder="Keywords, e.g. LCD cost">
+          <select id="steam"><option value="">All teams</option></select>
+          <button class="go" id="searchBtn">Search</button>
+        </div>
+        <div class="muted small" style="margin-top:8px" id="searchMode">This is what the agent's search tools see: keyword matches merged with matches by meaning.</div>
+      </div>
+      <div id="searchOut"></div>
+    </section>
+
+    <section id="submission">
+      <div id="subOut"></div>
+    </section>
+
+    <section id="add">
+      <div class="card">
+        <h2>Add a meeting transcript</h2>
+        <div class="muted small" style="margin-bottom:10px">Choose a .txt transcript. It is checked first; nothing is stored until you press Add.</div>
+        <div class="row">
+          <input type="file" id="addFile" accept=".txt,text/plain">
+        </div>
+        <div class="row" style="margin-top:10px">
+          <input type="text" id="addTeam" placeholder="Team (only if the file does not say)" style="max-width:300px">
+          <input type="text" id="addNumber" placeholder="Meeting number (only if needed)" style="max-width:260px">
+          <label class="small"><input type="checkbox" id="addReplace"> Replace if already stored</label>
+        </div>
+        <div id="addPreview" class="small" style="margin-top:12px"></div>
+        <div class="row" style="margin-top:12px">
+          <button class="go" id="addBtn" disabled>Add to memory</button>
+          <span class="muted small">Adding makes 2 to 5 model calls: it reads this meeting, then re-links this team's decision threads. Other teams are untouched.</span>
+        </div>
+      </div>
+      <div id="addOut"></div>
+      <details class="card">
+        <summary>Transcript format</summary>
+        <pre class="passage" style="max-height:none">Meeting: ACME7c            (optional; defaults to the file name)
+Team: ACME7                (optional if the id is the team name plus one letter)
+Meeting number: 3          (optional if the id ends in a letter: a = 1, b = 2, ...)
+
+00:00:02 Speaker A
+The words spoken in this turn, on one line.
+
+00:00:09 Speaker B
+The next turn.</pre>
+        <div class="muted small">Or drop files into data/transcripts and run <code>python main.py build</code>.</div>
+      </details>
+    </section>
+  </div>
+
+  <aside class="card" id="ctx">
+    <h2>Transcript</h2>
+    <div class="muted small">Click a citation or a ledger item to read it in context here. Every quote on this site opens at the exact turn it came from.</div>
+  </aside>
+</main>
+
+<script>
+// All transcript and model text goes in through textContent, never innerHTML.
+const $ = (id) => document.getElementById(id);
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") el.className = v;
+    else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+    else if (v !== null && v !== undefined) el.setAttribute(k, v);
+  }
+  for (const kid of kids.flat()) if (kid !== null && kid !== undefined) el.append(kid);
+  return el;
+}
+const api = async (path) => (await fetch(path)).json();
+const clear = (el) => { el.replaceChildren(); return el; };
+
+// ---------------------------------------------------------------- tabs
+function showTab(tab) {
+  document.querySelectorAll("#tabs button").forEach((x) => x.classList.toggle("on", x.dataset.tab === tab));
+  document.querySelectorAll("section").forEach((s) => s.classList.toggle("on", s.id === tab));
+  if (tab === "timeline" && !$("tlOut").childElementCount) loadTimeline();
+  if (tab === "submission" && !$("subOut").childElementCount) loadSubmission();
+}
+document.querySelectorAll("#tabs button").forEach((b) => b.addEventListener("click", () => {
+  history.replaceState(null, "", "#" + b.dataset.tab);
+  showTab(b.dataset.tab);
+}));
+// Deep links, e.g. #timeline/TS3012/c or #search/LCD cost/IS1000, so a view can be shared or bookmarked.
+function fromHash() {
+  const [tab, a, b] = decodeURIComponent(location.hash.slice(1)).split("/");
+  if (!["ask", "timeline", "search", "submission", "add"].includes(tab)) return;
+  if (tab === "timeline" && a) {
+    $("team").value = a;
+    const ms = (teamList.find((t) => t.team === a) || { meetings: [] }).meetings;
+    // "#timeline/TS3012/c" and "#timeline/TS3012/TS3012c" both work
+    asOf = ms.includes(b) ? b : (ms.find((m) => b && m.endsWith(b)) || "");
+    clear($("tlOut"));
+  }
+  showTab(tab);
+  if (tab === "search" && a) { $("sq").value = a; $("steam").value = b || ""; runSearch(); }
+}
+
+// ---------------------------------------------------------------- transcript context
+async function showContext(meeting, turn, quote, pad) {
+  const ctx = clear($("ctx"));
+  ctx.append(h("h2", {}, "Transcript " + meeting), h("div", { class: "muted small" }, h("span", { class: "spinner" }), "Loading"));
+  const p = new URLSearchParams({ meeting, pad: pad || 4 });
+  if (turn) p.set("turn", turn);
+  if (quote) p.set("quote", quote);
+  const d = await api("/api/context?" + p);
+  clear(ctx).append(h("h2", {}, "Transcript " + meeting));
+  if (!d.turns.length) { ctx.append(h("div", { class: "bad small" }, "Those words are not in this meeting.")); return; }
+  const roles = Object.entries(d.roles || {}).map(([k, v]) => `${k}: ${v}`).join(" · ");
+  if (roles) ctx.append(h("div", { class: "muted small" }, roles));
+  const more = () => h("button", { class: "linkish", onclick: () => showContext(meeting, d.focus, quote, d.pad + 10) }, "Show more of the meeting");
+  const first = d.turns[0].turn, last = d.turns[d.turns.length - 1].turn;
+  if (quote) ctx.append(h("div", { class: "small " + (d.verified ? "ok" : "warn") },
+    d.verified ? "Quote found word for word in one turn." : "Shown at the closest matching turn."));
+  for (const t of d.turns) {
+    const body = h("span", {});
+    const q = t.turn === d.focus && d.quote ? d.quote : null;
+    const at = q ? t.text.replace(/\s+/g, " ").toLowerCase().indexOf(q.toLowerCase()) : -1;
+    const text = t.text.replace(/\s+/g, " ");
+    if (at >= 0) body.append(text.slice(0, at), h("mark", {}, text.slice(at, at + q.length)), text.slice(at + q.length));
+    else body.append(text);
+    ctx.append(h("div", { class: "turn" + (t.turn === d.focus ? " focus" : "") },
+      h("span", { class: "when" }, `${t.turn} · ${t.t}`), h("span", { class: "who" }, t.speaker), body));
+  }
+  if ((first > 1 || last < d.last_turn) && d.pad < 60) ctx.append(h("div", { style: "margin-top:10px" }, more()));
+  ctx.append(h("div", { class: "muted small", style: "margin-top:8px" }, `Turns ${first} to ${last} of ${d.last_turn}`));
+  const focus = ctx.querySelector(".turn.focus");
+  if (focus && d.pad > 4) focus.scrollIntoView({ block: "center" });
+}
+
+function citeButton(c) {
+  const b = h("button", { class: "cite", title: "Read in the transcript", onclick: () => showContext(c.meeting_id, c.turn, c.quote) },
+    h("span", { class: "mid" }, c.meeting_id + (c.who ? " · Speaker " + c.who : "")), "“" + c.quote + "”");
+  if (c.verified === true) b.append(h("span", { class: "badge ok" }, "exact"));
+  if (c.verified === false) b.append(h("span", { class: "badge bad" }, "not exact"));
+  return b;
+}
+
+function itemButton(it, showMeeting) {
+  const b = h("button", { class: `item ${it.kind}` + (it.superseded_by ? " superseded" : "") + (it.current ? " current" : ""), onclick: () => showContext(it.meeting_id, it.turn, it.quote) },
+    h("div", {}, it.current ? h("span", { class: "badge current", title: `Replaced ${it.replaces.map((i) => "#" + i).join(", ")} and has not been replaced itself` }, "stands") : null,
+      h("span", { class: "kind " + it.kind }, it.kind),
+      h("span", { class: "muted" }, `  ${showMeeting ? it.meeting_id + " · " : ""}Speaker ${it.speaker} · #${it.id}`)),
+    h("div", { class: "stmt" }, it.statement));
+  if (it.owner) b.append(h("div", { class: "muted" }, "Owner: Speaker " + it.owner));
+  if (it.superseded_by) b.append(h("div", { class: "sup" }, `Replaced by #${it.superseded_by.id} in ${it.superseded_by.meeting_id}`));
+  return b;
+}
+
+// ---------------------------------------------------------------- ask
+async function ask() {
+  const question = $("q").value.trim();
+  if (!question) return;
+  const out = clear($("askOut")), btn = $("askBtn"), status = $("askStatus");
+  btn.disabled = true; status.textContent = "Working...";
+  askStarted = Date.now(); askQuestion = question;
+  const steps = h("div", { class: "card" }, h("h2", {}, h("span", { class: "spinner" }), "What the agent is doing"));
+  out.append(steps);
+  try {
+    const res = await fetch("/api/ask", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question }) });
+    const reader = res.body.getReader(), dec = new TextDecoder();
+    let buf = "";
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      let nl;
+      while ((nl = buf.indexOf("\n")) >= 0) {
+        const line = buf.slice(0, nl); buf = buf.slice(nl + 1);
+        if (line.trim()) onEvent(JSON.parse(line), steps, out, status);
+      }
+    }
+  } catch (e) {
+    out.append(h("div", { class: "card bad" }, "Request failed: " + e.message));
+  }
+  btn.disabled = false;
+  const spin = steps.querySelector(".spinner");
+  if (spin) { spin.remove(); steps.querySelector("h2").textContent = "What the agent did"; }
+  if (status.textContent.startsWith("Working")) status.textContent = "Done.";
+}
+let askStarted = 0, askQuestion = "";
+const askLog = [];  // this session's questions, newest first
+function drawHistory() {
+  const box = clear($("askHistory"));
+  if (askLog.length < 2) return;
+  const card = h("div", { class: "card" }, h("h2", {}, "Earlier in this session"));
+  askLog.slice(1).forEach((e) => card.append(h("button", { class: "hist", title: "Show this answer again", onclick: () => {
+    $("q").value = e.question; clear($("askOut")).append(answerCard(e.ev, e.question));
+  } }, e.question)));
+  box.append(card);
+}
+function answerCard(ev, question) {
+  const card = h("div", { class: "card" }, h("h2", {}, "Answer"), h("div", { class: "answer" }, ev.answer));
+  if (!ev.citations.length) card.append(h("div", { class: "bad small" }, "No citation passed the checker."));
+  ev.citations.forEach((c) => card.append(citeButton({ ...c, verified: true })));
+  if (ev.unverified && ev.unverified.length) card.append(h("div", { class: "warn small" }, "Checker notes: " + ev.unverified.join(" ")));
+  const copy = h("button", { class: "linkish", onclick: async () => {
+    const json = JSON.stringify({ question, answer: ev.answer, citations: ev.citations }, null, 2);
+    try { await navigator.clipboard.writeText(json); copy.textContent = "Copied"; }
+    catch (e) { copy.textContent = "Copy failed"; }
+    setTimeout(() => { copy.textContent = "Copy as JSON"; }, 1500);
+  } }, "Copy as JSON");
+  card.append(h("div", { class: "muted small", style: "margin-top:10px" },
+    `${ev.steps} steps · ${ev.seconds ? ev.seconds + " s · " : ""}${ev.model} · ${ev.reviewed ? "checked by a second reader · " : ""}quotes copied from the transcript by code · `, copy));
+  return card;
+}
+function onEvent(ev, steps, out, status) {
+  if (ev.type === "start") {
+    status.textContent = `Working... team ${ev.team || "not named"}, model ${ev.model}`;
+  } else if (ev.type === "step") {
+    const review = ev.observation.startsWith("REVIEW");
+    const rejected = review || ev.observation.startsWith("ANSWER REJECTED") || ev.observation.startsWith("All your citations");
+    const args = ev.tool === "answer" ? "(draft answer)" : JSON.stringify(ev.args);
+    steps.append(h("div", { class: "step" + (rejected ? " rejected" : "") },
+      h("div", {}, h("span", { class: "muted" }, ev.step + ". "), h("span", { class: "tool" }, ev.tool + " "), h("span", { class: "muted small" }, args)),
+      h("details", {}, h("summary", {}, review ? "Sent back by the second reader" : rejected ? "Sent back by the checker" : "What came back"), h("pre", {}, ev.observation))));
+    status.textContent = `Working... step ${ev.step}`;
+  } else if (ev.type === "answer") {
+    ev.seconds = Math.round((Date.now() - askStarted) / 1000);
+    out.prepend(answerCard(ev, askQuestion));
+    askLog.unshift({ question: askQuestion, ev });
+    drawHistory();
+    status.textContent = "Done.";
+  } else if (ev.type === "error") {
+    out.prepend(h("div", { class: "card bad" }, "The model call failed: " + ev.error));
+    status.textContent = "Failed.";
+  }
+}
+[
+  ["Changed decision", "Team TS3012 talked about making the remote rechargeable in their second meeting. What happened to that idea in the third meeting, and what energy source did they choose?"],
+  ["Who said it", "In Team IS1000's final costing, what did the LCD display cost by itself, who said so, and how many buttons would they have to cut down to?"],
+  ["False premise", "What did Team IS1001 cut from their design after their final costing came in over budget?"],
+  ["A hard one", "In Team ES2013's third meeting two members said they had been thinking of the same case material. What was it, and what had influenced one of them?"],
+].forEach(([label, text]) => $("examples").append(
+  h("button", { class: "pill", title: text, onclick: () => { $("q").value = text; $("q").focus(); } }, label)));
+$("askBtn").addEventListener("click", ask);
+$("q").addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) ask(); });
+
+// ---------------------------------------------------------------- timeline
+let asOf = "";
+async function loadTimeline() {
+  const team = $("team").value, out = clear($("tlOut"));
+  const meetings = (teamList.find((t) => t.team === team) || { meetings: [] }).meetings;
+  const pills = clear($("asof"));
+  if (!meetings.includes(asOf)) asOf = "";
+  [["", "All meetings"], ...meetings.map((m) => [m, m])].forEach(([v, label]) =>
+    pills.append(h("button", { class: "pill" + (asOf === v ? " on" : ""), onclick: () => { asOf = v; loadTimeline(); } }, label)));
+  history.replaceState(null, "", `#timeline/${team}` + (asOf ? `/${asOf}` : ""));
+  const d = await api(`/api/timeline?team=${encodeURIComponent(team)}` + (asOf ? `&as_of=${encodeURIComponent(asOf)}` : ""));
+  const upTo = asOf ? meetings.slice(0, meetings.indexOf(asOf) + 1) : meetings;
+  const roles = Object.entries(d.roles || {}).map(([k, v]) => `Speaker ${k}: ${v}`).join(" · ");
+  const replaced = d.threads.reduce((n, th) => n + th.items.filter((it) => it.superseded_by).length, 0);
+  clear($("tlTeam")).append(h("div", { class: "card" },
+    h("h2", {}, `Team ${team}` + (asOf ? `, as it stood after ${asOf}` : "")),
+    h("div", { class: "muted small" }, roles || "Roles are not established for this team."),
+    h("div", { class: "facts" },
+      h("div", {}, h("b", {}, String(upTo.length)), "meetings"),
+      h("div", {}, h("b", {}, String(d.threads.length)), "subjects tracked"),
+      h("div", {}, h("b", {}, String(d.counts.decisions)), "decisions"),
+      h("div", {}, h("b", {}, String(replaced)), "positions replaced"),
+      h("div", {}, h("b", {}, String(d.counts.actions)), "actions"))));
+  if (!d.threads.length) out.append(h("div", { class: "card empty" }, "No subjects linked yet for this team. Run python main.py build."));
+  const needle = $("tlFilter").value.trim().toLowerCase(), onlyChanged = $("tlChanged").checked;
+  let hidden = 0;
+  for (const th of d.threads) {
+    const text = (th.topic + " " + (th.outcome || "") + " " + th.items.map((it) => it.statement + " " + it.topic).join(" ")).toLowerCase();
+    if ((needle && !text.includes(needle)) || (onlyChanged && !th.items.some((it) => it.superseded_by))) { hidden++; continue; }
+    // A team with many meetings would give unreadably thin columns, so show only the ones this thread touches.
+    const shown = upTo.length > 5 ? upTo.filter((m) => th.items.some((it) => it.meeting_id === m)) : upTo;
+    const grid = h("div", { class: "thread-grid", style: `--cols:${Math.min(shown.length, 5)}` });
+    for (const m of shown) {
+      const col = h("div", {}, h("div", { class: "col-head" }, m));
+      th.items.filter((it) => it.meeting_id === m).forEach((it) => col.append(itemButton(it, false)));
+      grid.append(col);
+    }
+    const n = th.items.filter((it) => it.superseded_by).length;
+    out.append(h("div", { class: "card" },
+      h("h2", {}, th.topic, n ? h("span", { class: "badge warn" }, `${n} replaced`) : null),
+      th.outcome ? h("div", { class: "now" }, h("span", {}, "Where it ended up"), th.outcome) : null, grid));
+  }
+  if (hidden) out.append(h("div", { class: "muted small" }, `${hidden} subject${hidden === 1 ? "" : "s"} hidden by the filter.`));
+}
+$("team").addEventListener("change", () => { asOf = ""; loadTimeline(); });
+$("tlFilter").addEventListener("input", () => { clearTimeout(window.tlTimer); window.tlTimer = setTimeout(loadTimeline, 250); });
+$("tlChanged").addEventListener("change", loadTimeline);
+
+// ---------------------------------------------------------------- search
+async function runSearch() {
+  const q = $("sq").value.trim(), out = clear($("searchOut"));
+  if (!q) return;
+  const d = await api(`/api/search?q=${encodeURIComponent(q)}&team=${$("steam").value}`);
+  $("searchMode").textContent = d.mode === "keyword"
+    ? "Keyword search only (BM25). Run python main.py embed to add search by meaning."
+    : "Keyword matches merged with matches by meaning. This is what the agent's search tools see.";
+  out.append(h("h3", {}, `Ledger items (${d.items.length})`));
+  if (!d.items.length) out.append(h("div", { class: "muted small" }, "None."));
+  d.items.forEach((it) => out.append(itemButton(it, true)));
+  out.append(h("h3", {}, `Transcript passages (${d.passages.length})`));
+  if (!d.passages.length) out.append(h("div", { class: "muted small" }, "None."));
+  d.passages.forEach((p) => out.append(h("div", { class: "card" },
+    h("button", { class: "pill", onclick: () => showContext(p.meeting_id, Math.round((p.turn_start + p.turn_end) / 2)) },
+      `${p.meeting_id} turns ${p.turn_start}-${p.turn_end}`),
+    h("pre", { class: "passage" }, p.text))));
+}
+$("searchBtn").addEventListener("click", runSearch);
+$("sq").addEventListener("keydown", (e) => { if (e.key === "Enter") runSearch(); });
+
+// ---------------------------------------------------------------- submission
+async function loadSubmission() {
+  const d = await api("/api/submission"), out = clear($("subOut"));
+  if (!d.answers.length) {
+    out.append(h("div", { class: "card muted" }, "No question file for this data set. Put a questions.json next to the transcripts folder and run python main.py answer-all."));
+    return;
+  }
+  const cites = d.answers.flatMap((a) => a.citations);
+  const exact = cites.filter((c) => c.verified).length;
+  const empty = d.answers.filter((a) => !a.citations.length).length;
+  const view = (which) => { subView = which; loadSubmission(); };
+  const filter = h("input", { type: "text", placeholder: "Filter by team or words", value: subFilter,
+    oninput: (e) => { subFilter = e.target.value; clearTimeout(window.subTimer); window.subTimer = setTimeout(drawAnswers, 200); } });
+  out.append(h("div", { class: "card" }, h("h2", {}, "answers.json"),
+    h("div", { class: "small" }, `${d.answers.length} questions · `,
+      h("span", { class: exact === cites.length ? "ok" : "bad" }, `${exact} of ${cites.length} citations exact`),
+      empty ? h("span", { class: "bad" }, ` · ${empty} without a citation`) : null),
+    h("div", { class: "row", style: "margin-top:12px" },
+      h("button", { class: "pill" + (subView === "answers" ? " on" : ""), onclick: () => view("answers") }, `Answers (${d.answers.length})`),
+      h("button", { class: "pill" + (subView === "brief" ? " on" : ""), onclick: () => view("brief") }, "Brief"),
+      subView === "answers" ? filter : null)));
+  const list = h("div", {});
+  out.append(list);
+  function drawAnswers() {
+    clear(list);
+    const needle = subFilter.trim().toLowerCase();
+    const shown = d.answers.filter((a) => !needle || (a.question_id + " " + a.team + " " + a.question + " " + a.answer).toLowerCase().includes(needle));
+    if (!shown.length) list.append(h("div", { class: "card empty" }, "No answer matches that filter."));
+    for (const a of shown) {
+      const card = h("div", { class: "card" },
+        h("div", { class: "muted small" }, `${a.question_id} · ${a.team} · `,
+          h("button", { class: "linkish", onclick: () => { location.hash = `#timeline/${a.team}`; fromHash(); } }, "open this team's timeline")),
+        h("h2", {}, a.question),
+        h("div", { class: "answer", style: "font-size:15px" }, a.answer || h("span", { class: "bad" }, "No answer yet.")));
+      a.citations.forEach((c) => card.append(citeButton(c)));
+      if (a.judge) card.append(h("details", { style: "margin-top:8px" },
+        h("summary", {}, `Chosen from pass ${a.judge.pick} of ${a.judge.of || 2}` + (a.judge.judge ? ` by ${a.judge.judge}` : "")),
+        h("div", { class: "small muted", style: "margin-top:6px" }, a.judge.why || "")));
+      list.append(card);
+    }
+  }
+  function drawBrief() {
+    const b = d.brief_parts;
+    if (!b) { list.append(h("div", { class: "card" }, h("pre", { class: "brief" }, d.brief || "No brief yet."))); return; }
+    list.append(h("div", { class: "card" }, h("h2", {}, b.title), b.intro.map((t) => h("div", { class: "small", style: "margin-top:4px" }, t))));
+    for (const sec of b.sections) {
+      const card = h("div", { class: "card" }, h("h3", { style: "margin-top:0" }, `${sec.title} (${sec.points.length})`));
+      sec.points.forEach((p) => card.append(h("div", { class: "point" }, h("div", {}, p.text),
+        p.citations.map((c) => citeButton({ meeting_id: c.meeting_id, quote: c.quote, verified: c.verified, who: c.speaker })))));
+      list.append(card);
+    }
+  }
+  if (subView === "brief") drawBrief(); else drawAnswers();
+}
+let subView = "answers", subFilter = "";
+
+// ---------------------------------------------------------------- add a meeting
+let addText = "", addName = "";
+const addFields = () => ({ filename: addName, text: addText, team: $("addTeam").value.trim(),
+  number: $("addNumber").value.trim(), replace: $("addReplace").checked });
+async function checkAdd() {
+  const box = clear($("addPreview"));
+  $("addBtn").disabled = true;
+  if (!addText) return;
+  const res = await fetch("/api/check", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(addFields()) });
+  const d = await res.json();
+  if (!res.ok) { box.append(h("pre", { class: "passage bad", style: "max-height:none" }, d.error)); return; }
+  box.append(h("div", { class: "ok" }, `Looks good: ${d.meeting_id}, meeting ${d.number} of team ${d.team}.`),
+    h("div", {}, `${d.turns} turns · ${d.words.toLocaleString()} words · speakers ${d.speakers.join(", ")}`),
+    h("div", { class: "muted" }, d.new_team ? "This is a new team." : `Already on file for this team: ${d.team_meetings.join(", ")}.`));
+  if (d.later.length) box.append(h("div", { class: "warn" },
+    `Note: ${d.later.join(", ")} come after this one, so decisions in it can be marked as replaced by them.`));
+  if (d.exists && !$("addReplace").checked) { box.append(h("div", { class: "bad" }, "This meeting is already stored. Tick replace to reload it.")); return; }
+  $("addBtn").disabled = false;
+}
+$("addFile").addEventListener("change", async (e) => {
+  const f = e.target.files[0];
+  addText = f ? await f.text() : ""; addName = f ? f.name : "";
+  checkAdd();
+});
+["addTeam", "addNumber", "addReplace"].forEach((id) => $(id).addEventListener("change", checkAdd));
+$("addBtn").addEventListener("click", async () => {
+  const out = clear($("addOut")), btn = $("addBtn");
+  btn.disabled = true;
+  const log = h("div", { class: "card" }, h("h2", {}, "Progress"));
+  out.append(log);
+  const res = await fetch("/api/add", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(addFields()) });
+  if (!res.ok) { log.append(h("div", { class: "bad" }, (await res.json()).error)); return; }
+  const reader = res.body.getReader(), dec = new TextDecoder();
+  let buf = "";
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    let nl;
+    while ((nl = buf.indexOf("\n")) >= 0) {
+      const line = buf.slice(0, nl); buf = buf.slice(nl + 1);
+      if (!line.trim()) continue;
+      const ev = JSON.parse(line);
+      if (ev.type === "log") log.append(h("div", { class: "small" }, ev.text));
+      if (ev.type === "error") log.append(h("div", { class: "bad" }, ev.error));
+      if (ev.type === "done") {
+        log.append(h("div", { class: "ok" }, `Done: ${ev.meeting_id} added with ${ev.items} ledger items.`),
+          h("button", { class: "pill", style: "margin-top:8px", onclick: () => { location.hash = `#timeline/${ev.team}`; fromHash(); } },
+            `Open ${ev.team}'s decision timeline`));
+        await loadTeams();
+      }
+    }
+  }
+});
+
+// ---------------------------------------------------------------- start
+let teamList = [], lastStats = "";
+async function loadTeams() {
+  const s = await api("/api/stats");
+  lastStats = JSON.stringify(s);
+  $("stats").textContent = `${s.meetings} meetings · ${(s.words || 0).toLocaleString()} words · ${s.items.toLocaleString()} ledger items · ${s.threads} threads · ${s.supersessions} replacements`;
+  teamList = await api("/api/teams");
+  const current = $("team").value;
+  clear($("team"));
+  clear($("steam")).append(h("option", { value: "" }, "All teams"));
+  for (const t of teamList) {
+    $("team").append(h("option", { value: t.team }, t.team));
+    $("steam").append(h("option", { value: t.team }, t.team));
+  }
+  const fallback = teamList.some((t) => t.team === "TS3012") ? "TS3012" : (teamList[0] || {}).team;
+  $("team").value = teamList.some((t) => t.team === current) ? current : (fallback || "");
+  // Example questions only make sense for teams that are in the store.
+  document.querySelectorAll("#examples button").forEach((b) => {
+    b.style.display = teamList.some((t) => b.title.includes(t.team)) ? "" : "none";
+  });
+}
+// The store can change underneath an open page (the Add tab, `python main.py add`, or a
+// rebuild on a new data set). Check every few seconds and redraw whatever is on screen.
+async function refreshIfChanged() {
+  let s;
+  try { s = JSON.stringify(await api("/api/stats")); } catch (e) { return; }
+  if (s === lastStats) return;
+  await loadTeams();
+  clear($("subOut"));
+  const open = document.querySelector("section.on").id;
+  if (open === "timeline") loadTimeline(); else clear($("tlOut"));
+  if (open === "submission") loadSubmission();
+  if (open === "search" && $("sq").value.trim()) runSearch();
+}
+(async () => { await loadTeams(); fromHash(); setInterval(refreshIfChanged, 8000); })();
+</script>
+</body>
+</html>

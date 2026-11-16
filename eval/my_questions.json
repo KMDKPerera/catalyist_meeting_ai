@@ -1,0 +1,176 @@
+[
+  {
+    "id": "E01",
+    "team": "TS3012",
+    "type": "idea dropped across meetings",
+    "question": "Team TS3012 talked about making the remote rechargeable in their second meeting. What happened to that idea in the third meeting, and what energy source did they choose?",
+    "gold_answer": "In meeting c the component options had no rechargeable module (Speaker A: it wasn't in the options), so the rechargeable unit was ruled out and the team took a basic, regular battery; users can still put rechargeable batteries in themselves.",
+    "key_points": ["basic|regular|normal|standard", "not (in|on|among|one of) the (options|list)|wasn't (in|on|an|one)|was not (in|on|an|one)|rule[sd] out|dropped|abandon|no rechargeable"],
+    "evidence": [
+      {"meeting_id": "TS3012b", "quote": "Shall we uh also look if it's possible to make a rechargeable remote?"},
+      {"meeting_id": "TS3012c", "quote": "it wasn't in the options, a rechargeable m module actually."},
+      {"meeting_id": "TS3012c", "quote": "Okay, will just take regular batteries."}
+    ]
+  },
+  {
+    "id": "E02",
+    "team": "IS1001",
+    "type": "decision then number",
+    "question": "What shape and battery did Team IS1001 agree on for their remote, and when the costs were added up in the final meeting, what did it come to against what limit?",
+    "gold_answer": "They agreed on a yellow banana-shaped case with a spongy rubber cover and a standard battery. The cost came to 10.7 Euros against a limit of 12.5 Euros.",
+    "key_points": ["banana", "standard|normal|regular|basic", "10[.,]7|ten point seven", "12[.,]50?|twelve point five|twelve (and a half|fifty)"],
+    "evidence": [
+      {"meeting_id": "IS1001c", "quote": "Okay odd shape with spongy cover. And standard battery okay"},
+      {"meeting_id": "IS1001d", "quote": "And the cost ended to be ten point seven Euros."}
+    ]
+  },
+  {
+    "id": "E03",
+    "team": "ES2012",
+    "type": "feature kept under cost pressure",
+    "question": "Team ES2012 asked themselves whether voice technology was fundamental to the project. Was the voice sensor still in the final costed design, what did the costing come to, and what did they have instead of a scroll wheel?",
+    "gold_answer": "Yes. Speaker A said the voice sensor is expensive but fundamental to the design, so it stays. The costing came in exactly on target at 12.5, with push buttons and a simple slider instead of a scroll wheel.",
+    "key_points": ["yes|kept|stay|remain|still in|retain|included", "12[.,]50?|twelve point five|twelve (and a half|fifty)", "slider"],
+    "evidence": [
+      {"meeting_id": "ES2012c", "quote": "do we think that the voice technology is fundamental to the project?"},
+      {"meeting_id": "ES2012d", "quote": "the costings uh come in at exactly on target at twelve point five"}
+    ]
+  },
+  {
+    "id": "E04",
+    "team": "IS1004",
+    "type": "decision then budget fix, with speaker",
+    "question": "Team IS1004 opened their third meeting undecided about an LCD screen. What did they decide about it, and when the final costing came in over budget, what change brought it back and who said it?",
+    "gold_answer": "They dropped the LCD in meeting c. In meeting d the costing was over budget and Speaker B (with Speaker C at the same moment) said to make the case plastic instead of rubber, which put them on budget.",
+    "key_points": ["drop|forget|forgot|ruled out|no L_?C_?D|abandon|not (to )?(be )?(have|used?|included?)|without|against|scrapp", "plastic", "rubber", "(?-i:Speaker [BC]\\b)"],
+    "evidence": [
+      {"meeting_id": "IS1004c", "quote": "So i it looks like we're going completely to forget about the L_C_D_ thing."},
+      {"meeting_id": "IS1004d", "quote": "Make it plastic instead of rubber. And then we're basically o on budget"}
+    ]
+  },
+  {
+    "id": "E05",
+    "team": "ES2013",
+    "type": "who said what, then number",
+    "question": "In Team ES2013's third meeting two members said they had been thinking of the same case material. What was it, what had influenced one of them, and what total cost did the team reach in the final meeting out of what allowance?",
+    "gold_answer": "Titanium: Speakers B and C both said so, and Speaker C had been influenced by pictures of iPods (minimalist and shiny). In meeting d the total cost was 9.20 out of the 12.50 allowed.",
+    "key_points": ["titanium", "iPod", "9[.,]20?|nine (pounds? |euros? )?(and )?twenty", "12[.,]50?|twelve (and a half|fifty|point five)"],
+    "evidence": [
+      {"meeting_id": "ES2013c", "quote": "I have been influenced by pictures of iPods, and they're also minimalist and shiny."},
+      {"meeting_id": "ES2013d", "quote": "the total cost has been calculated as nine Pounds twenty out of the twelve and a half we were allowed."}
+    ]
+  },
+  {
+    "id": "E06",
+    "team": "TS3012",
+    "type": "role resolved from an earlier meeting",
+    "question": "In Team TS3012's third meeting one speaker said kinetic energy was their personal favourite. Which speaker was it, and what role did that speaker introduce themselves with at the kickoff meeting?",
+    "gold_answer": "Speaker C, who introduced themselves in meeting a as the Industrial Designer.",
+    "key_points": ["(?-i:Speaker C\\b)", "industrial designer"],
+    "evidence": [
+      {"meeting_id": "TS3012a", "quote": "I'm the Industrial Designer, and there are three main questions that I have to find an answer to today."},
+      {"meeting_id": "TS3012c", "quote": "My personal uh fav favourite is the kinetic provision"}
+    ]
+  },
+  {
+    "id": "E07",
+    "team": "ES2005",
+    "type": "numbers inside one meeting",
+    "question": "Team ES2005's costing in the final meeting first came out too high. What was the first figure, what turned out to be wrong in the costing, and what was the corrected figure?",
+    "gold_answer": "The first figure was 14.6 Euros. The double-curved case had been entered twice when it should have been once; correcting it took three Euros off and gave 11.60 Euros, under the 12.50 limit.",
+    "key_points": ["14[.,]6|fourteen point six", "curv","11[.,]60?|eleven (euros? )?(and )?sixty|eleven point six"],
+    "evidence": [
+      {"meeting_id": "ES2005d", "quote": "it's gonna cost us fourteen point six Euros."},
+      {"meeting_id": "ES2005d", "quote": "It's meant to be one, yeah, I don't know why I put two in there"}
+    ]
+  },
+  {
+    "id": "E08",
+    "team": "ES2015",
+    "type": "target then outcome",
+    "question": "What maximum production cost was Team ES2015 given at their first meeting, and what did their final design cost?",
+    "gold_answer": "An absolute maximum of 12.50 Euros was set in meeting a. The final design came to 12.20 Euros, just under budget.",
+    "key_points": ["12[.,]50?|twelve (euros? )?(and )?(fifty|a half)|twelve point five", "12[.,]20?|twelve (euros? )?(and )?twenty"],
+    "evidence": [
+      {"meeting_id": "ES2015a", "quote": "we want it to cost, uh, absolute maximum of twelve Euro and fifty cents."},
+      {"meeting_id": "ES2015d", "quote": "So um our operating cost is twelve twenty Euros."}
+    ]
+  },
+  {
+    "id": "E09",
+    "team": "TS3005",
+    "type": "decision then budget cut, with speaker",
+    "question": "Team TS3005 agreed on a kind of screen for their remote in the second meeting. In the final costing, what did Speaker C propose losing to get under budget, and what figure did that give?",
+    "gold_answer": "They agreed on an LCD touch screen in meeting b. In meeting d Speaker C proposed losing the scroll wheel and depending entirely on the touch screen, which gave 11.5.",
+    "key_points": ["L_?C_?D|touch ?screen", "scroll", "11[.,]5|eleven point five"],
+    "evidence": [
+      {"meeting_id": "TS3005b", "quote": "So we're going for an L_C_D_ screen?"},
+      {"meeting_id": "TS3005d", "quote": "If we lose the scroll wheel and make it totally uh depending uh dependent on uh the touch screen"},
+      {"meeting_id": "TS3005d", "quote": "You lose this one, you got eleven point five"}
+    ]
+  },
+  {
+    "id": "E10",
+    "team": "IS1000",
+    "type": "who said what, with a number",
+    "question": "In Team IS1000's final costing, what did the LCD display cost by itself, who said so, and how many buttons did the team work out they would have to cut down to in order to fit the budget?",
+    "gold_answer": "Speaker A said the LCD display is three Euros by itself. Speaker B worked out they would have to cut to seven buttons to fit in 12.50.",
+    "key_points": ["three|\\b3\\b", "(?-i:Speaker A\\b)", "seven|\\b7\\b"],
+    "evidence": [
+      {"meeting_id": "IS1000d", "quote": "So the L_C_D_ display is is three Francs, sorry three Euros, by itself."},
+      {"meeting_id": "IS1000d", "quote": "we have to make seven to to fit in in twelve twelve fifty."}
+    ]
+  },
+  {
+    "id": "E11",
+    "team": "IS1001",
+    "type": "false premise",
+    "question": "What did Team IS1001 cut from their design after their final costing came in over budget?",
+    "gold_answer": "Nothing: the premise is wrong. The final costing came to 10.7 Euros, under the 12.5 Euro limit, and the project manager said they could continue with the product as it was.",
+    "key_points": ["under|below|within|not over|wasn't over|was not over|did not (come|go)|didn't (come|go)|nothing|no cut", "10[.,]7|ten point seven"],
+    "evidence": [
+      {"meeting_id": "IS1001d", "quote": "And the cost ended to be ten point seven Euros."},
+      {"meeting_id": "IS1001d", "quote": "So for the financial aspect it's okay, we can uh we can continue with this product"}
+    ]
+  },
+  {
+    "id": "H01",
+    "team": "TS3012",
+    "type": "held out: decision reversed by cost",
+    "held_out": true,
+    "question": "Team TS3012 agreed to add speech recognition in their third meeting. What did the first costing in the final meeting come to against the limit, and what happened to speech recognition?",
+    "gold_answer": "The costing came to 17 Euros against the 12.50 permitted, so speech recognition was scrapped to get down to 12.50.",
+    "key_points": ["seventeen|\\b17\\b", "12[.,]50?|twelve (and a half|fifty|point five)", "scrap|drop|remov|cut|taken out|took out|left out|abandon"],
+    "evidence": [
+      {"meeting_id": "TS3012c", "quote": "If it's small, if it's fits, if if people like it, why not?"},
+      {"meeting_id": "TS3012d", "quote": "You have the total of seventeen Euros in production cost, which is higher than the twelve and a half that we are permitted to use."},
+      {"meeting_id": "TS3012d", "quote": "to have production cost of twelve and a half Euros, spe scrap speech recognition"}
+    ]
+  },
+  {
+    "id": "H02",
+    "team": "IS1006",
+    "type": "held out: proposal then costing",
+    "held_out": true,
+    "question": "In Team IS1006's third meeting, which energy source and case material did the designers propose and why not solar cells? In the final costing, which two components did Speaker D say were the most expensive?",
+    "gold_answer": "They proposed a simple battery, because solar cells would not give enough energy, and a titanium case instead of rubber. In meeting d Speaker D said the most expensive things were the LCD and the speaker.",
+    "key_points": ["batter", "titanium", "enough (energy|power)|not (provide|give|supply|have|generate) (enough|sufficient)|insufficient|problematic", "L_?C_?D", "speaker"],
+    "evidence": [
+      {"meeting_id": "IS1006c", "quote": "we would like to propose battery instead of solar cells and it would be problematic uh to have enough energy with the solar cells"},
+      {"meeting_id": "IS1006d", "quote": "if I look at what is the most expensive things, uh it's the L_C_D_ and the speaker."}
+    ]
+  },
+  {
+    "id": "H03",
+    "team": "TS3008",
+    "type": "held out: who said what, with numbers",
+    "held_out": true,
+    "question": "In Team TS3008's final meeting, who suggested raising the production cost to fifteen Euros, and what selling price did that speaker say would keep the profit the same?",
+    "gold_answer": "Speaker D suggested fifteen Euros and said they could sell for 27.50 and make as much profit as with 12.50 production costs.",
+    "key_points": ["(?-i:Speaker D\\b)", "27[.,]50?|twenty[- ]seven (and a half|fifty|point five)"],
+    "evidence": [
+      {"meeting_id": "TS3008d", "quote": "Can't we uh Can't we say fifteen Euros?"},
+      {"meeting_id": "TS3008d", "quote": "You can sell for twenty seven and a half. Then you make as much profit as you would with twelve and a half production costs."}
+    ]
+  }
+]

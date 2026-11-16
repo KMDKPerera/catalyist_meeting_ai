@@ -1,0 +1,127 @@
+{
+ "Q01": {
+  "pick": 2,
+  "why": "Draft B more closely matches the wording in the transcript, where speaker A notes they would need 'a lot of extra buttons' (turn 102) and speaker B notes they would 'lose our whole concept' (turn 104).",
+  "judge": "gemini-3.8-flash"
+ },
+ "Q02": {
+  "pick": 2,
+  "why": "Draft A accurately explains the reason for switching to plastic as stated by Speaker B in ES2003d turn 56: they were over budget due to the LCD screen, so changing the case to a solid plastic design was necessary to reduce costs and stay within budget.",
+  "judge": "gemini-3.6-flash"
+ },
+ "Q03": {
+  "pick": 1,
+  "why": "Draft A correctly answers all parts of the prompt, including who first proposed the titanium (Speaker B in turn 316) and what it was replaced with.",
+  "judge": "gemini-3.5-flash-lite"
+ },
+ "Q04": {
+  "pick": 1,
+  "why": "Draft B provides a more accurate and complete summary of the team's decision-making process, correctly citing the meeting where the energy source was initially chosen (TS3011c, turn 287) and the meeting where it was subsequently dropped due to costs (TS3011d, turn 52).",
+  "judge": "gemini-3.1-flash-lite"
+ },
+ "Q05": {
+  "pick": 2,
+  "why": "Draft B correctly identifies that the team initially discussed a simple battery (TS3007b, turn 46), then considered a combination (TS3007c, turn 32), and finally settled on a battery (TS3007d, turn 375), whereas Draft A incorrectly claims they started with the combination.",
+  "judge": "gemini-3.1-flash-lite"
+ },
+ "Q06": {
+  "pick": 1,
+  "why": "Draft B correctly identifies that the statistic about the remote being lost was raised by Speaker D in meeting ES2008b (turn 33), whereas Draft A incorrectly attributes the origin of the discussion to turn 267.",
+  "judge": "gemini-3.1-flash-lite"
+ },
+ "Q07": {
+  "pick": 1,
+  "why": "Draft A correctly identifies that D was the team member assigned the task and provides the specific cost figure reported in meeting IS1008d (turn 77). Draft B incorrectly identifies Ed as the team member, whereas the transcript shows D is the one speaking and taking the action item.",
+  "judge": "gemini-3.1-flash-lite"
+ },
+ "Q08": {
+  "pick": 1,
+  "why": "Draft B provides a more accurate and comprehensive summary of the team's discussion, correctly noting that the team maintained the anti-RSI feature as a marketing point despite initial skepticism, and it avoids the oversimplification found in Draft A.",
+  "judge": "gemini-3.1-flash-lite"
+ },
+ "Q09": {
+  "pick": 2,
+  "why": "Draft B correctly identifies that Speaker D suggested an exclusive market niche, whereas Draft A incorrectly attributes a specific price of eighty-nine Euros to Speaker D as a proposal for the product's actual market price, when it was merely a hypothetical example used in a discussion about design.",
+  "judge": "gemini-3.1-flash-lite"
+ },
+ "Q10": {
+  "pick": 1,
+  "why": "Draft B correctly identifies that the team initially discussed targeting the 16-45 age group (TS3003b, turn 13) before later deciding to focus on the 60-80 age group (TS3003c, turn 5). Draft A incorrectly claims the team initially focused on the 60-80 age group.",
+  "judge": "gemini-3.1-flash-lite"
+ },
+ "Q11": {
+  "pick": 1,
+  "why": "Draft A correctly identifies that the project manager (Speaker A) clarified the remote would not support DVDs, whereas Draft B incorrectly states the remote would not feature a DVD player, which is a slightly different technical implication than the requirement to support DVD functionality.",
+  "judge": "gemini-3.1-flash-lite"
+ },
+ "Q12": {
+  "pick": 2,
+  "why": "Draft A correctly identifies that the team decided the remote's distinctive design would make it easy to locate (turn 336), whereas Draft B incorrectly suggests they relied on an alarm or beeping feature for that purpose.",
+  "judge": "gemini-3.1-flash-lite"
+ },
+ "Q13": {
+  "pick": 2,
+  "why": "Draft B correctly identifies that the final decision was made in meeting TS3004d (turn 15) and provides a more accurate summary of the team's process without misinterpreting the sequence of events in meeting TS3004c.",
+  "judge": "gemini-3.1-flash-lite"
+ },
+ "Q14": {
+  "pick": 1,
+  "why": "Draft B provides a more accurate and complete summary of the team's discussion in turn 242 and 248, correctly identifying that the voice recognition feature was excluded from the 8.20 euro cost total.",
+  "judge": "gemini-3.1-flash-lite"
+ },
+ "Q15": {
+  "pick": 2,
+  "why": "Both drafts are accurate, but Draft B provides a more precise description of the component removed ('LCD display' vs 'LCD screen') and cites the specific turn (262) where the team confirms the budget is met after the removal.",
+  "judge": "gemini-3.1-flash-lite"
+ },
+ "Q16": {
+  "pick": 2,
+  "why": "Draft A correctly identifies both the joystick and the specific cost-saving measures (push-buttons and removing special button coloring) as confirmed in turn 251 of TS3010d.",
+  "judge": "gemini-3.1-flash-lite"
+ },
+ "Q17": {
+  "pick": 1,
+  "why": "Draft A correctly identifies that the decision to drop the touch screen occurred in meeting ES2009c (turn 194), whereas Draft B incorrectly attributes the decision to meeting ES2009d.",
+  "judge": "gemini-3.1-flash-lite"
+ },
+ "Q18": {
+  "pick": 1,
+  "why": "Draft B correctly identifies that the initial plan was a sensor/buzzer system (turn 104) and that the change to a clap-activated locator was to accommodate all age ranges (turn 176), whereas Draft A incorrectly claims the initial plan was a whistle-back function.",
+  "judge": "gemini-3.1-flash-lite"
+ },
+ "Q19": {
+  "pick": 2,
+  "why": "Draft B correctly identifies that Speaker B suggested the switch from wood to plastic in turn 432, whereas Draft A incorrectly attributes the initial suggestion of wood to Speaker B (it was Speaker A in turn 283).",
+  "judge": "gemini-3.1-flash-lite"
+ },
+ "Q20": {
+  "pick": 1,
+  "why": "Draft B accurately reflects the discussion in turn 128, where Speaker A explains the decision to focus on television only to avoid complexity and ensure a quick release, whereas Draft A incorrectly attributes this decision to 'management'.",
+  "judge": "gemini-3.1-flash-lite"
+ },
+ "Q21": {
+  "pick": 2,
+  "why": "Draft B correctly identifies that Speaker A suggested removing the LCD screen in turn 258, whereas Draft A incorrectly attributes this decision to the team as a whole.",
+  "judge": "gemini-3.1-flash-lite"
+ },
+ "Q22": {
+  "pick": 1,
+  "why": "Draft B correctly identifies that Speaker D preferred triple-A batteries because they would make the remote thinner (turn 90), whereas Draft A incorrectly attributes the preference for triple-A batteries to them being lighter.",
+  "judge": "gemini-3.1-flash-lite"
+ },
+ "Q23": {
+  "pick": 2,
+  "why": "Draft B correctly identifies that the team replaced the expensive sample speaker with a simple beeping mechanism to retain the locator function, as confirmed in turn 427, whereas Draft A incorrectly claims the locator feature was removed.",
+  "judge": "gemini-3.1-flash-lite"
+ },
+ "Q24": {
+  "pick": 2,
+  "why": "Draft A correctly identifies that the project manager (B) liked the idea of kinetic power (turn 269) and that the final design used batteries only due to cost (turn 102). Draft B incorrectly attributes the project manager's interest to a light feature, which was actually suggested by D.",
+  "judge": "gemini-3.1-flash-lite"
+ },
+ "Q25": {
+  "pick": 1,
+  "why": "Draft A correctly identifies that the team decided to use interchangeable designs based on fruit and vegetables, supported by the prototype presentation in ES2011d turn 2. Draft B incorrectly claims they decided against the shapes, whereas the team actually proceeded with the interchangeable fruit/vegetable designs.",
+  "judge": "gemini-3.1-flash-lite"
+ }
+}
